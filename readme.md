@@ -22,18 +22,28 @@ Examples of using:
 conf file structure:
 
 [DEFAULT]
+
 Directory = D:\\Boris\\Documents\\Projects\\
+
 > Start directory
+
 ; comma separated extensions lists
 Extension = .bat,.pyc
+
 > Here you can write list of file extensions
+
 Out_file_name = Computer_log_file.txt
+
 > Out file name
 
 [USER_SETTINGS]
+
 ; may be empty. if not - script will read directory list from file with this filename
 FileWithDirectoryList = ''
+
 > This feature wasn't developed
+
 ; comma separated directories list
 DirectoryList = d:\\Boris\\Documents\\,d:\\tools\\,d:\\games\\
+
 > Directory list for scanning
