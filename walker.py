@@ -1,140 +1,317 @@
 # -*- coding: utf-8 -*-
 
+"""
+1. If you run script without any command-line params,
+    the script wil show some kind of menu with 3 choices:
+    1. default folder (c: or ~, for instance)
+    2. custom folder (user have to input the folder name)
+    3. folder list (from .conf file is exists or do nothing)
+
+2. Add date and time in output filename
+
+3. If you run script with .conf file name or with others command-line params
+    the script will use these params for scanning. Command line params have
+    highest priority than .conf file params or script params
+
+"""
 import os
 import sys
 import configparser
 import argparse
 import codecs
-
-# First setup of pf params.
-# We will resetup them later from .conf file or argparse
-default_ext = '.txt'
-
-if 'win' in sys.platform:
-    default_dir = 'c:\\'
-else:
-    default_dir = '~'  # check for linux
-
-out_fn = 'Computer_log_file.txt'
-str_dir_list = ''
-dir_list = []
-
-# Look at command-line args
-parser = argparse.ArgumentParser(description='This script scans for files in directories from default dir.',
-                                 epilog='Also it can use specific .conf file.\
-                                         Examples of using: \
-                                         1. python walker.py -h\n \
-                                         2. python walker.py -c walker2.conf -d d:\\  \
-                                         3. python walker.py -e .bat,.com  \
-                                         4. python walker.py -c walker2.conf -d d:\ -e .bat  \
-                                         5. python walker.py -c walker2.conf -o out.txt')
-parser.add_argument('--conf', '-c', type=str,
-                    help='.conf file name.  \
-                    If .conf file exists, then script will take exists params from the file')
-parser.add_argument('--dir', '-d', type=str,
-                    help='Default directory name.')
-parser.add_argument('--ext', '-e', type=str,
-                    help='Files extensions with leading dot. \
-                          It may be a single value or comma separated list.')
-parser.add_argument('--out', '-o', type=str,
-                    help='Default output file name.')
-
-args = parser.parse_args()
-
-if args.conf:
-    config_file_name = args.conf
-else:
-    # default config file name
-    # make file from script directory
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    config_file_name = os.path.join(script_dir, 'walker.conf')
-
-# Trying to reach .conf file
-has_config = False
-
-if os.path.isfile(config_file_name) and os.path.getsize(config_file_name) > 0:
-    print("Opening {} configuration file".format(config_file_name))
-    config = configparser.ConfigParser()
-    has_config = True
-
-    try:
-        config.read(config_file_name)
-    except Exception as e:
-        print("Error reading {} file".format(config_file_name))
-        raise e
+import logging
+import datetime
 
 
-if has_config:
-    if args.ext is None:
-        try:
-            default_ext_list = config['DEFAULT']['Extension']
-        except Exception as e:
-            pass
-    else:
-        default_ext_list = args.ext
-    default_ext = default_ext_list.split(',')
+# *********************************************
+def get_menu_choice():
+    def print_menu():
+        print(30 * "-", "WALKER MENU", 30 * "-")
+        print("1. Use only script default directory ")
+        print("2. Use manually entered custom folder ")
+        print("3. Use folder list from manually entered filename ")
+        print("4. Exit from the script ")
+        print(73 * "-")
 
-    if args.dir is None:
-        try:
-            default_dir = config['DEFAULT']['Directory']
-        except Exception as e:
-            pass
-    else:
-        default_dir = args.dir
+    loop = True
+    int_choice = -1
 
-    if args.out is None:
-        try:
-            out_fn = config['DEFAULT']['Out_file_name']
-        except Exception as e:
-            pass
-    else:
-        out_fn = args.out
+    while loop:          # While loop which will keep going until loop = False
+        print_menu()    # Displays menu
+        choice = input("Enter your choice [1-4]: ")
 
-    try:
-        str_dir_list = config['USER_SETTINGS']['DirectoryList']
-        dir_list = str_dir_list.split(',')
-    except Exception as e:
-        pass
-"""
-print("config_file_name", config_file_name)
-print("default_ext", default_ext)
-print("default_dir", default_dir)
-print("out_fn", out_fn)
-print("dir_list", dir_list)
-"""
+        if choice == '1':
+            int_choice = 1
+            loop = False
+        elif choice == '2':
+            choice = ''
+            while len(choice) == 0:
+                choice = input("Enter custom folder name(s). \
+It may be a list of folder's names (example: c:,d:\docs): ")
+            int_choice = 2
+            loop = False
+        elif choice == '3':
+            choice = ''
+            while len(choice) == 0:
+                choice = input("Enter a single filename of a file \
+with custom folders list: ")
+            int_choice = 3
+            loop = False
+        elif choice == '4':
+            int_choice = 4
+            print("Exiting..")
+            sys.exit()
+        else:
+            # Any inputs other than values 1-4 we print an error message
+            input("Wrong menu selection. Enter any key to try again..")
+    return [int_choice, choice]
 
 
-def get_file_list_in_dir(dir_name):
+# *********************************************
+def get_processed_menu_choice(menu_choice, default_parms):
+    if menu_choice[0] == 1:
+        return default_parms
+    if menu_choice[0] == 2:
+        default_parms['dir_list'] = menu_choice[1].split(',')
+    if menu_choice[0] == 3:
+        default_parms['cdl_fn'] = menu_choice[1]
+    return default_parms
+
+
+# *********************************************
+def show_wait(text, i):
+    if (i % 4) == 0:
+        print(text + '%s' % ("/"), end='\r')
+    elif (i % 4) == 1:
+        print(text + '%s' % ("-"), end='\r')
+    elif (i % 4) == 2:
+        print(text + '%s' % ("\\"), end='\r')
+    elif (i % 4) == 3:
+        print(text + '%s' % ("|"), end='\r')
+    elif i == -1:
+        print(text + 'Done!')
+        print()
+
+
+# *********************************************
+def get_file_list_in_dir(dir_name, ext_list):
     result_list = []
+
     tree = os.walk(dir_name)
+    i = 0
+
+    logging.debug('get_file_list_in_dir(). dir_name is %s' % (dir_name))
 
     for d, dirs, files in tree:
         for file in files:
             filename, file_extension = os.path.splitext(file)
-            if file_extension and file_extension in default_ext:
+            if file_extension and file_extension in ext_list:
                 path = os.path.join(d, file)
                 result_list.append(path)
+                show_wait("Scaning    ", i)
+                i += 1
+    show_wait("Scaning    ", -1)
+
     return result_list
 
 
-print("Scanning..")
-path_f = []
-if len(dir_list) > 0:
-    for directory in dir_list:
-        path_f.extend(get_file_list_in_dir(directory))
+# *********************************************
+def load_custom_directories_list_from_file(cdl_filename):
+    if os.path.isfile(cdl_filename):
+        try:
+            with codecs.open(cdl_filename, 'r', 'utf-8') as f:
+                cdl_file_content = f.readlines()
+                # remove special chars like `\n` at the end of each line
+                cdl_file_content = [x.strip() for x in cdl_file_content]
+
+                return cdl_file_content
+        except Exception as e:
+            logging.error(e)
+            raise e
+    return []
+
+
+# *********************************************
+def get_parms_from_conf_file(conf_file_name, default_parms):
+    config = configparser.ConfigParser()
+
+    try:
+        config.read(conf_file_name)
+    except Exception as e:
+        print("Error reading {} file".format(conf_file_name))
+        logging.error("Error reading %s file" % conf_file_name)
+        raise e
+
+    try:
+        default_parms['ext'] = config['USER_SETTINGS']['Extensions'].split(',')
+    except Exception as e:
+        pass
+
+    try:
+        default_parms['out_fn'] = config['USER_SETTINGS']['Out_file_name']
+    except Exception as e:
+        pass
+
+    try:
+        default_parms['cdl_fn'] = config['USER_SETTINGS']['FileWithDirectoryList']
+    except Exception as e:
+        logging.error("Error reading params in %s file" % conf_file_name)
+        pass
+
+    try:
+        default_parms['dir_list'] = config['USER_SETTINGS']['DirectoryListForScan'].split(',')
+    except Exception as e:
+        logging.error("Error reading params in %s file" % conf_file_name)
+        pass
+
+    return default_parms
+
+
+logging.basicConfig(filename='walker.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(lineno)d - %(message)s')
+
+logging.debug('#' * 50)
+logging.debug('----   ---   start processing params   ----   ---')
+
+# First setup of script params.
+# We will resetup them later from .conf file, argparse or user input
+
+logging.debug('sys.platform is %s' % sys.platform)
+
+# default script directory for scanning
+if 'win' in sys.platform:
+    default_app_dir_for_scan = 'c:\\'
 else:
-    path_f.extend(get_file_list_in_dir(default_dir))
+    default_app_dir_for_scan = '~'  # check for linux
+
+version = '3.0'
+# default script params
+def_parms = dict(ext=['.txt'],
+                 cdl_fn=None,
+                 dir_list=[default_app_dir_for_scan],
+                 out_fn='Computer_log_file.txt')
+
+str_dir_list = ''
+
+# we will use these params as scan params
+walker_parms = dict(ext=[],
+                    cdl_fn=None,
+                    dir_list=def_parms['dir_list'],
+                    out_fn=def_parms['out_fn'])
+
+menu_choice = []
+
+# getting script directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+logging.debug('script directory is %s' % script_dir)
+
+print('Directories scanner. Version %s' % version)
+
+# Look at command-line args
+parser = argparse.ArgumentParser(description='This script scans for files in directories from default dir.')
+parser.add_argument('--conf', '-c', type=str,
+                    help='.conf file name.  \
+                    If .conf file exists, then script will take \
+                    exists params from the file \
+                    excepts additional params in command line.')
+parser.add_argument('--dl', '-dl', type=str,
+                    help='Comma separated directory list for scaning.')
+parser.add_argument('--dlf', '-dlf', type=str,
+                    help='Filename of file with directory list for scaning.')
+parser.add_argument('--ext', '-e', type=str,
+                    help='Files extensions with leading dot. \
+                          It may be a single value (.txt) or \
+                          comma separated list (.txt,.log).')
+parser.add_argument('--out', '-o', type=str,
+                    help='Output file name. \
+                    Default value is "Computer_log_file"')
+
+args = parser.parse_args()
+logging.debug('args is %s' % args)
+
+# ****************************************
+"""
+if no args:
+    params.dirlist = show_menu
+elif have conf:
+    params = data from conf
+elif have conf and args:
+    params = data from conf
+    params = args
+"""
+# ****************************************
+
+if not len(sys.argv) > 1:
+    # There are no command-line args
+    menu_choice = get_menu_choice()
+
+    walker_parms = get_processed_menu_choice(menu_choice, def_parms)
+    logging.debug('There are no command-line args and we are in show_menu')
+    logging.debug('Menu choice is %s' % menu_choice)
+    logging.debug("walker params are %s after menu processing" % walker_parms)
+else:
+    logging.debug('There are existing command-line args \
+and we are going to process these args')
+
+    # Trying to reach .conf file
+    if args.conf and os.path.isfile(args.conf) and os.path.getsize(args.conf) > 0:
+        print("Opening {} configuration file".format(args.conf))
+        logging.debug("Opening %s configuration file" % args.conf)
+
+        walker_parms = get_parms_from_conf_file(args.conf, def_parms)
+        logging.debug("walker params are %s after configuration file processing" % walker_parms)
+
+    if args.ext:
+        walker_parms['ext'] = args.ext.split(',')
+
+    if args.dl:
+        walker_parms['dir_list'] = args.dl.split(',')
+
+    if args.out:
+        walker_parms['out_fn'] = args.out
+
+    if args.dlf:
+        walker_parms['cdl_fn'] = args.dlf
+    logging.debug("walker params are %s after command line args processing" % walker_parms)
+
+
+# adding custom directory list from file
+if walker_parms['cdl_fn']:
+    cdl_list = load_custom_directories_list_from_file(walker_parms['cdl_fn'])
+    if len(cdl_list) is not None:
+        walker_parms['dir_list'] = cdl_list
+    logging.debug("walker params are %s after custom dir list processing" % walker_parms)
+
+logging.debug('----   ---   start working   ----   ---')
+logging.debug('walker params are %s' % walker_parms)
+
+scan_result_list = []
+if len(walker_parms['dir_list']) == 0:
+    print("Nothing to scan")
+    sys.exit()
+
+for directory in walker_parms['dir_list']:
+    if os.path.isdir(directory):
+        logging.debug('We are using %s as root directory' % directory)
+        scan_result_list.extend(get_file_list_in_dir(directory, walker_parms['ext']))
+    else:
+        logging.debug('Directory %s does not exists. Skipped' % directory)
+        print('Directory %s does not exists. Skipped' % directory)
 
 print("Saving results..")
 try:
-    file_out = codecs.open(out_fn, "w", "utf-8")
+    out_name, f_ext = os.path.splitext(walker_parms['out_fn'])
+    walker_parms['out_fn'] = ''.join([out_name, "__", datetime.datetime.now().strftime("%m-%d-%Y_%I_%M_%p"), f_ext])
+    logging.debug("walker_parms['out_fn'] with datetime suffix is %s" % walker_parms['out_fn'])
+    file_out = codecs.open(walker_parms['out_fn'], "w", "utf-8")
 except Exception as e:
-    print("Error while opening {}".format(out_fn))
+    print("Error while opening {}".format(walker_parms['out_fn']))
     raise e
 
-for full_f in path_f:
-    full_f += "\n"
-    file_out.write(full_f)
+for full_fn in scan_result_list:
+    full_fn += "\n"
+    file_out.write(full_fn)
 
 file_out.close()
 

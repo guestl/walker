@@ -39,11 +39,13 @@ Out_file_name = Computer_log_file.txt
 [USER_SETTINGS]
 
 ; may be empty. if not - script will read directory list from file with this filename
+
 FileWithDirectoryList = ''
 
 > This feature wasn't developed
 
 ; comma separated directories list
+
 DirectoryList = d:\\Boris\\Documents\\,d:\\tools\\,d:\\games\\
 
 > Directory list for scanning
