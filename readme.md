@@ -5,10 +5,10 @@ This script scans for files in directories from default dir.
 
 There are many ways of setting up the script. It can be default settings, settings from .conf files, command-line arguments, and, finally, settings from internal menu. As output the script generates txt files with date time in the filename.
 
-Default scipt settings have a lowest priority
-Next priority have the settings from internal menu
-Next have settings from the conf file
-The highest priority have settings from command-line args
+*Default scipt settings have a lowest priority
+*Next priority have the settings from internal menu
+*Next have settings from the conf file
+*The highest priority have settings from command-line args
 
 ## Internal menu
 Internal menu is available if user run script without any additional params.
