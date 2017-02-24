@@ -74,3 +74,13 @@ FileWithDirectoryList = ''
 DirectoryListForScan = d:\\Boris\\Documents\\,d:\\tools\\,d:\\games\\
 
 > Comma separated directory list for scanning. If empty or commented the script will use its own default settings
+
+## Custom directory list format
+
+Just a simple text file where each line is a separate directory. For example:
+
+c:\documents
+
+d:\books
+
+d:\tools
