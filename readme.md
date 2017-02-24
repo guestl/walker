@@ -19,7 +19,7 @@ Internal menu has choices:
  >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. Directory for scan C: or ~, filename extension .txt as search criteria, output filename Computer_log_file + datetime.txt*
  
 1. Use manually entered custom folder
- >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but folder will be entered manually.
+ >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but folder will be entered manually.*
  
 2. Use folder list from manually entered filename
  >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but directories list will be loaded from file what filename you will enter.*
