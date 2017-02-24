@@ -16,22 +16,14 @@ Internal menu is available if user run script without any additional params.
 Internal menu has choices:
 
 0. Use only script default directory
-
 >*In this case script will run  with default params which are written in source code in "def_parms" dictionary.
 >directory for scan C: or ~, filename extension .txt as search criteria, output filename Computer_log_file + datetime.txt*
-
 1. Use manually entered custom folder
-
 >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but folder will be entered manually.
-
 2. Use folder list from manually entered filename
-
 >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but directories list will be loaded from file what filename you will enter.*
-
 3. Use manually entered custom conf file
-
 >*In this case custom conf file will be loadeda and its settings will be used*
-
 4. Exit from the script
 >*Just close the script and exit to OS*
 
@@ -40,19 +32,19 @@ Internal menu has choices:
 0. `python walker.py`
 >*The script will show a internal menu with choices.*
 
-2. `python walker.py -h`
+1. `python walker.py -h`
 >*show help message for command line args*
 
-3. `python walker.py -c findpictures.conf -d d:\`
+2. `python walker.py -c findpictures.conf -d d:\`
 >*load settings from walker2.conf. except directory setting, this setting will be taken from -d param.*
 
-4. `python walker.py -e .bat,.com`
+3. `python walker.py -e .bat,.com`
 >*scan files with default settings. except extensions list, it will be taken from -e param*
 
-5. `python walker.py -c walker.conf -d d:\ -e .bat`
+4. `python walker.py -c walker.conf -d d:\ -e .bat`
 >*load settings from homedir.conf if exists or with default settings. except extensions list and default dir, it will be taken from -e and -d params*
 
-6. `python walker.py -dlf dirlist.txt -o out.txt`
+5. `python walker.py -dlf dirlist.txt -o out.txt`
 >*Script will use default settings. Except output file name, it will be taken from -o param and except directory list. The list will be loaded from -dlf param*
 
 ## Conf file structure
