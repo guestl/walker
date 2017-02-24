@@ -30,7 +30,8 @@ def get_menu_choice():
         print("1. Use only script default directory ")
         print("2. Use manually entered custom folder ")
         print("3. Use folder list from manually entered filename ")
-        print("4. Exit from the script ")
+        print("4. Use manually entered custom conf file ")
+        print("5. Exit from the script ")
         print(73 * "-")
 
     loop = True
@@ -38,7 +39,7 @@ def get_menu_choice():
 
     while loop:          # While loop which will keep going until loop = False
         print_menu()    # Displays menu
-        choice = input("Enter your choice [1-4]: ")
+        choice = input("Enter your choice [1-5]: ")
 
         if choice == '1':
             int_choice = 1
@@ -58,7 +59,13 @@ with custom folders list: ")
             int_choice = 3
             loop = False
         elif choice == '4':
+            choice = ''
+            while len(choice) == 0:
+                choice = input("Enter a single filename of a file \
+with custom folders list: ")
             int_choice = 4
+            loop = False
+        elif choice == '5':
             print("Exiting..")
             sys.exit()
         else:
@@ -75,6 +82,8 @@ def get_processed_menu_choice(menu_choice, default_parms):
         default_parms['dir_list'] = menu_choice[1].split(',')
     if menu_choice[0] == 3:
         default_parms['cdl_fn'] = menu_choice[1]
+    if menu_choice[0] == 4:
+        default_parms['conf_fn'] = menu_choice[1]
     return default_parms
 
 
@@ -145,11 +154,13 @@ def get_parms_from_conf_file(conf_file_name, default_parms):
     try:
         default_parms['ext'] = config['USER_SETTINGS']['Extensions'].split(',')
     except Exception as e:
+        logging.error("Error reading params in %s file" % conf_file_name)
         pass
 
     try:
         default_parms['out_fn'] = config['USER_SETTINGS']['Out_file_name']
     except Exception as e:
+        logging.error("Error reading params in %s file" % conf_file_name)
         pass
 
     try:
@@ -190,7 +201,8 @@ version = '3.0'
 def_parms = dict(ext=['.txt'],
                  cdl_fn=None,
                  dir_list=[default_app_dir_for_scan],
-                 out_fn='Computer_log_file.txt')
+                 out_fn='Computer_log_file.txt',
+                 conf_fn=None)
 
 str_dir_list = ''
 
@@ -198,7 +210,8 @@ str_dir_list = ''
 walker_parms = dict(ext=[],
                     cdl_fn=None,
                     dir_list=def_parms['dir_list'],
-                    out_fn=def_parms['out_fn'])
+                    out_fn=def_parms['out_fn'],
+                    conf_fn=None)
 
 menu_choice = []
 
@@ -247,6 +260,7 @@ if not len(sys.argv) > 1:
     menu_choice = get_menu_choice()
 
     walker_parms = get_processed_menu_choice(menu_choice, def_parms)
+
     logging.debug('There are no command-line args and we are in show_menu')
     logging.debug('Menu choice is %s' % menu_choice)
     logging.debug("walker params are %s after menu processing" % walker_parms)
@@ -254,8 +268,9 @@ else:
     logging.debug('There are existing command-line args \
 and we are going to process these args')
 
-    # Trying to reach .conf file
+    logging.debug("Args.conf is %s" % args.conf)
     if args.conf and os.path.isfile(args.conf) and os.path.getsize(args.conf) > 0:
+        # Trying to reach .conf file
         print("Opening {} configuration file".format(args.conf))
         logging.debug("Opening %s configuration file" % args.conf)
 
@@ -274,6 +289,17 @@ and we are going to process these args')
     if args.dlf:
         walker_parms['cdl_fn'] = args.dlf
     logging.debug("walker params are %s after command line args processing" % walker_parms)
+
+if walker_parms['conf_fn']:
+    if os.path.isfile(walker_parms['conf_fn']) and os.path.getsize(walker_parms['conf_fn']) > 0:
+        print("Opening {} configuration file".format(walker_parms['conf_fn']))
+        logging.debug("Opening %s configuration file" % walker_parms['conf_fn'])
+
+        walker_parms = get_parms_from_conf_file(walker_parms['conf_fn'], def_parms)
+        logging.debug("walker params are %s after configuration file processing" % walker_parms)
+    else:
+        logging.error("Error while opening %s configuration file" % walker_parms['conf_fn'])
+        print('Unable to open %s file' % walker_parms['conf_fn'])
 
 
 # adding custom directory list from file
