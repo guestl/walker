@@ -16,14 +16,17 @@ Internal menu is available if user run script without any additional params.
 Internal menu has choices:
 
 0. Use only script default directory
- >*In this case script will run  with default params which are written in source code in "def_parms" dictionary.
- >directory for scan C: or ~, filename extension .txt as search criteria, output filename Computer_log_file + datetime.txt*
+ >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. Directory for scan C: or ~, filename extension .txt as search criteria, output filename Computer_log_file + datetime.txt*
+ 
 1. Use manually entered custom folder
  >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but folder will be entered manually.
+ 
 2. Use folder list from manually entered filename
  >*In this case script will run  with default params which are written in source code in "def_parms" dictionary. but directories list will be loaded from file what filename you will enter.*
+
 3. Use manually entered custom conf file
  >*In this case custom conf file will be loadeda and its settings will be used*
+ 
 4. Exit from the script
  >*Just close the script and exit to OS*
 
