@@ -154,25 +154,25 @@ def get_parms_from_conf_file(conf_file_name, default_parms):
     try:
         default_parms['ext'] = config['USER_SETTINGS']['Extensions'].split(',')
     except Exception as e:
-        logging.error("Error reading params in %s file" % conf_file_name)
+        logging.error("Error reading ['USER_SETTINGS']['Extensions'] in %s file" % conf_file_name)
         pass
 
     try:
         default_parms['out_fn'] = config['USER_SETTINGS']['Out_file_name']
     except Exception as e:
-        logging.error("Error reading params in %s file" % conf_file_name)
+        logging.error("Error reading ['USER_SETTINGS']['Out_file_name'] in %s file" % conf_file_name)
         pass
 
     try:
         default_parms['cdl_fn'] = config['USER_SETTINGS']['FileWithDirectoryList']
     except Exception as e:
-        logging.error("Error reading params in %s file" % conf_file_name)
+        logging.error("Error reading ['USER_SETTINGS']['FileWithDirectoryList'] in %s file" % conf_file_name)
         pass
 
     try:
         default_parms['dir_list'] = config['USER_SETTINGS']['DirectoryListForScan'].split(',')
     except Exception as e:
-        logging.error("Error reading params in %s file" % conf_file_name)
+        logging.error("Error reading ['USER_SETTINGS']['DirectoryListForScan'] in %s file" % conf_file_name)
         pass
 
     return default_parms
@@ -196,7 +196,7 @@ if 'win' in sys.platform:
 else:
     default_app_dir_for_scan = '~'  # check for linux
 
-version = '3.0'
+version = '3.2'
 # default script params
 def_parms = dict(ext=['.txt'],
                  cdl_fn=None,
@@ -220,6 +220,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 logging.debug('script directory is %s' % script_dir)
 
 print('Directories scanner. Version %s' % version)
+logging.debug('Script version is %s' % version)
 
 # Look at command-line args
 parser = argparse.ArgumentParser(description='This script scans for files in directories from default dir.')

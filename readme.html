@@ -1,0 +1,156 @@
+<h1 id="usermanual">User manual</h1>
+
+<h2 id="intro">Intro</h2>
+
+<p>This script scans for files in directories from default dir.</p>
+
+<p>There are many ways of setting up the script. It can be default settings, settings from .conf files, command-line arguments, and, finally, settings from internal menu. As output the script generates txt files with date time in the filename.</p>
+
+<ul>
+<li>Default scipt settings have a lowest priority</li>
+
+<li>Next priority have the settings from internal menu</li>
+
+<li>Next have settings from the conf file</li>
+
+<li>The highest priority have settings from command-line args</li>
+</ul>
+
+<h2 id="internalmenu">Internal menu</h2>
+
+<p>Internal menu is available if user run script without any additional params.</p>
+
+<p>Internal menu has choices:</p>
+
+<ol>
+<li>Use only script default directory</li>
+</ol>
+
+<blockquote>
+  <p><em>In this case script will run  with default params which are written in source code in "def_parms" dictionary. Directory for scan C: or ~, filename extension .txt as search criteria, output filename Computer_log_file + datetime.txt</em></p>
+</blockquote>
+
+<ol>
+<li>Use manually entered custom folder</li>
+</ol>
+
+<blockquote>
+  <p><em>In this case script will run  with default params which are written in source code in "def_parms" dictionary. but folder will be entered manually.</em></p>
+</blockquote>
+
+<ol>
+<li>Use folder list from manually entered filename</li>
+</ol>
+
+<blockquote>
+  <p><em>In this case script will run  with default params which are written in source code in "def_parms" dictionary. but directories list will be loaded from file what filename you will enter.</em></p>
+</blockquote>
+
+<ol>
+<li>Use manually entered custom conf file</li>
+</ol>
+
+<blockquote>
+  <p><em>In this case custom conf file will be loadeda and its settings will be used</em></p>
+</blockquote>
+
+<ol>
+<li>Exit from the script</li>
+</ol>
+
+<blockquote>
+  <p><em>Just close the script and exit to OS</em></p>
+</blockquote>
+
+<h2 id="examplesofusing">Examples of using</h2>
+
+<ol>
+<li><code>python walker.py</code></li>
+</ol>
+
+<blockquote>
+  <p><em>The script will show a internal menu with choices.</em></p>
+</blockquote>
+
+<ol>
+<li><code>python walker.py -h</code></li>
+</ol>
+
+<blockquote>
+  <p><em>show help message for command line args</em></p>
+</blockquote>
+
+<ol>
+<li><code>python walker.py -c findpictures.conf -d d:\</code></li>
+</ol>
+
+<blockquote>
+  <p><em>load settings from walker2.conf. except directory setting, this setting will be taken from -d param.</em></p>
+</blockquote>
+
+<ol>
+<li><code>python walker.py -e .bat,.com</code></li>
+</ol>
+
+<blockquote>
+  <p><em>scan files with default settings. except extensions list, it will be taken from -e param</em></p>
+</blockquote>
+
+<ol>
+<li><code>python walker.py -c walker.conf -d d:\ -e .bat</code></li>
+</ol>
+
+<blockquote>
+  <p><em>load settings from homedir.conf if exists or with default settings. except extensions list and default dir, it will be taken from -e and -d params</em></p>
+</blockquote>
+
+<ol>
+<li><code>python walker.py -dlf dirlist.txt -o out.txt</code></li>
+</ol>
+
+<blockquote>
+  <p><em>Script will use default settings. Except output file name, it will be taken from -o param and except directory list. The list will be loaded from -dlf param</em></p>
+</blockquote>
+
+<h2 id="conffilestructure">Conf file structure</h2>
+
+<p>Good use case for conf file is spesific conf file for every use case. For example, one conf file for search pictures, second conf file for search executable files etc. User can load settings from conf files with command-line arguments or via internal script menu.</p>
+
+<p><em>Remarks: sumbol ";" is a start comment string symbol in a conf file. Also conf file can have a empty param</em> 
+<em>If there is a commented line or empy param, the script will use settings from command-line if exist or from default script params. If exists commented parameter the sript will use its own default settings.</em></p>
+
+<p>[USER_SETTINGS]</p>
+
+<p>Extension = .bat,.exe</p>
+
+<blockquote>
+  <p>Comma separated extensions lists. Here you can write list of file extensions or a single extension. If empty or commented the script will use its own default settings</p>
+</blockquote>
+
+<p>Out<em>file</em>name = Computer<em>log</em>file.txt</p>
+
+<blockquote>
+  <p>Out file name. If empty or commented the script will use its own default settings</p>
+</blockquote>
+
+<p>FileWithDirectoryList = ''</p>
+
+<blockquote>
+  <p>Script will read directory list from file with this filename.  If empty or commented the script will use its own default settings</p>
+</blockquote>
+
+<p>DirectoryListForScan = d:\Boris\Documents\,d:\tools\,d:\games\</p>
+
+<blockquote>
+  <p>Comma separated directory list for scanning. If empty or commented the script will use its own default settings</p>
+</blockquote>
+
+<h2 id="customdirectorylistformat">Custom directory list format</h2>
+
+<p>Just a simple text file where each line is a separate directory. For example:</p>
+
+<p>c:\documents</p>
+
+<p>d:\books</p>
+
+<p>d:\tools</p>
