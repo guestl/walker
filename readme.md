@@ -26,8 +26,11 @@ Internal menu has choices:
 
 3. Use manually entered custom conf file
  >*In this case custom conf file will be loadeda and its settings will be used*
+
+4. Use manually entered conf files directory
+>*Script will load conf files from the "conf" directory, what is located as sub-directory for walker.py. If something is absent in conf file the script will use default settings.*
  
-4. Exit from the script
+5. Exit from the script
  >*Just close the script and exit to OS*
 
 ## Examples of using
@@ -49,6 +52,9 @@ Internal menu has choices:
 
 5. `python walker.py -dlf dirlist.txt -o out.txt`
 >*Script will use default settings. Except output file name, it will be taken from -o param and except directory list. The list will be loaded from -dlf param*
+
+5. `python walker.py -cdir "conf"`
+>*Script will load conf files from the "conf" directory, what is located as sub-directory for walker.py. If something is absent in conf file the script will use default settings. Every other params from command-line will be ignored*
 
 ## Conf file structure
 
