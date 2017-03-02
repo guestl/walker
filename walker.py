@@ -1,19 +1,5 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
-"""
-1. If you run script without any command-line params,
-    the script wil show some kind of menu with 3 choices:
-    1. default folder (c: or ~, for instance)
-    2. custom folder (user have to input the folder name)
-    3. folder list (from .conf file is exists or do nothing)
-
-2. Add date and time in output filename
-
-3. If you run script with .conf file name or with others command-line params
-    the script will use these params for scanning. Command line params have
-    highest priority than .conf file params or script params
-
-"""
 import os
 import sys
 import configparser
