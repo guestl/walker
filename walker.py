@@ -174,7 +174,34 @@ def get_parms_from_conf_file(conf_file_name, default_parms):
         logging.error("Error reading ['USER_SETTINGS']['DirectoryListForScan'] in %s file" % conf_file_name)
         pass
 
+    try:
+        search_dict = dict()
+        search_dict = dict(config.items('SEARCH'))
+        search_dict = {k: v.split(',') for k, v in search_dict.items()}
+
+        search_list = list()
+        for search_out_fn, search_crit_list in search_dict.items():
+            for search_crit_item in search_crit_list:
+                search_list.append([search_out_fn, search_crit_item])
+
+        ret_params['search'] = search_list
+    except Exception as e:
+        logging.error("Error reading ['SEARCH'] section in %s file" % conf_file_name)
+        logging.error(e)
+        ret_params['search'] = None
+        pass
+
     return ret_params
+
+
+def grep_data(grep_list, data_for_grep):
+    result_list = list()
+
+    for item in data_for_grep:
+        if grep_list[1].lower() in item.lower():
+            result_list.append(item)
+
+    return result_list
 
 
 logging.basicConfig(filename='walker.log',
@@ -195,7 +222,7 @@ if 'win' in sys.platform:
 else:
     default_app_dir_for_scan = '/home'  # check for linux
 
-version = '3.5'
+version = '3.6'
 # default script params
 def_parms = dict(ext=['.txt'],
                  cdl_fn=None,
@@ -362,6 +389,19 @@ for single_param in walker_parms_list:
         else:
             logging.debug('Directory %s does not exists. Skipped' % directory)
             print('Directory %s does not exists. Skipped' % directory)
+
+    # grep
+    print("Grep results..")
+    if single_param['search'] is not None:
+        for single_grep_param in single_param['search']:
+            logging.debug("Single grep param is %s" % single_grep_param)
+            grep_list_res = grep_data(single_grep_param, scan_result_list)
+
+#            logging.debug("Grep result list is %s" % grep_list_res)
+
+            with codecs.open(single_grep_param[0], "w", "utf-8") as grep_file_out:
+                for single_grep_result in grep_list_res:
+                    grep_file_out.write(single_grep_result + "\n")
 
     print("Saving results..")
     try:
