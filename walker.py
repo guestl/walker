@@ -222,7 +222,7 @@ if 'win' in sys.platform:
 else:
     default_app_dir_for_scan = '/home'  # check for linux
 
-version = '3.6'
+version = '3.61'
 # default script params
 def_parms = dict(ext=['.txt'],
                  cdl_fn=None,
@@ -392,6 +392,7 @@ for single_param in walker_parms_list:
 
     # grep
     print("Grep results..")
+    logging.debug("Grep results..")
     if single_param['search'] is not None:
         for single_grep_param in single_param['search']:
             logging.debug("Single grep param is %s" % single_grep_param)
