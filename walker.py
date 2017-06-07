@@ -204,6 +204,12 @@ def grep_data(grep_list, data_for_grep):
     return result_list
 
 
+def get_outfilename_with_suffix(filename):
+    out_name, f_ext = os.path.splitext(filename)
+    result = ''.join([out_name, "__", datetime.datetime.now().strftime("%m-%d-%Y_%I_%M_%S,%f_%p"), f_ext])
+    return result
+
+
 logging.basicConfig(filename='walker.log',
                     level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(lineno)d - %(message)s')
@@ -222,7 +228,7 @@ if 'win' in sys.platform:
 else:
     default_app_dir_for_scan = '/home'  # check for linux
 
-version = '3.61'
+version = '3.62'
 # default script params
 def_parms = dict(ext=['.txt'],
                  cdl_fn=None,
@@ -400,14 +406,14 @@ for single_param in walker_parms_list:
 
 #            logging.debug("Grep result list is %s" % grep_list_res)
 
-            with codecs.open(single_grep_param[0], "w", "utf-8") as grep_file_out:
+            with codecs.open(get_outfilename_with_suffix(single_grep_param[0]), "w", "utf-8") as grep_file_out:
+                grep_file_out.write("results for searching \"" + single_grep_param[1] + "\" in result list\n")
                 for single_grep_result in grep_list_res:
                     grep_file_out.write(single_grep_result + "\n")
 
     print("Saving results..")
     try:
-        out_name, f_ext = os.path.splitext(single_param['out_fn'])
-        single_param['out_fn'] = ''.join([out_name, "__", datetime.datetime.now().strftime("%m-%d-%Y_%I_%M_%S,%f_%p"), f_ext])
+        single_param['out_fn'] = get_outfilename_with_suffix(single_param['out_fn'])
         logging.debug("single_param['out_fn'] with datetime suffix is %s" % single_param['out_fn'])
         with codecs.open(single_param['out_fn'], "w", "utf-8") as file_out:
             for full_fn in scan_result_list:
