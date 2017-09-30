@@ -139,3 +139,6 @@ $RECYCLE.BIN/
 *.lnk
 *.zip
 menu.py
+*.conf
+111.txt
+*.txt
